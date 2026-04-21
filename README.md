@@ -14,4 +14,4 @@ https://webtonicai.github.io/Kaps-Community/
 2. **Build and deployment** → **Source**: *Deploy from a branch*.
 3. **Branch**: `main`, folder **`/docs`**, Save.
 
-The site builds from the [`docs/`](docs/) folder (Jekyll + Markdown).
+The site builds from the [`docs/`](docs/) folder (Jekyll + Markdown). The main doc is a single **GPU rendering optimization** page on the site home.
