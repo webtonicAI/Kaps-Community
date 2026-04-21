@@ -2,8 +2,11 @@
 
 Public docs and [issues](https://github.com/webtonicAI/Kaps-Community/issues) for **Kaps** (implementation is in a private repo).
 
-**Documentation site (GitHub Pages):** after you enable Pages, it will be available at  
+**Documentation site (GitHub Pages):**  
 https://webtonicai.github.io/Kaps-Community/
+
+**404?** GitHub Pages is **case-sensitive** in the URL path. Use **`Kaps-Community`** (capital **K** and **C**).  
+`.../kaps-community/` returns 404. Copy the exact URL from **Settings → Pages** → *Your site is live at*.
 
 ## Enable GitHub Pages
 
