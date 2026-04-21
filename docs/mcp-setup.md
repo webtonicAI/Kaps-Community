@@ -25,6 +25,13 @@ can caption-render videos in a single tool call.
 Each tool mirrors the same-named REST operation 1:1 — see the
 [API reference](api-reference.html) for the full field list.
 
+### `render_captioned_video` — `resolution` and `fps`
+
+These behave the same as in the REST API:
+
+- **`resolution`** — Omit to keep the **source video’s** resolution. Set `720p`, `1080p`, `4k`, or `native` when you want to scale or lock dimensions (`native` preserves the original size).
+- **`fps`** — Only `30` or `60` when set. Omit to match the **source video’s** frame rate.
+
 ---
 
 ## Prerequisites
@@ -144,18 +151,18 @@ A typical agent flow looks like:
 
 ```
 > User: "Caption this lecture using the 'Lecture Notes' preset:
->        https://cdn.example.com/lec42.mp4. 1080p is fine."
+>        https://cdn.example.com/lec42.mp4"
 
 1. Tool call  → list_presets()
 2. Tool call  → render_captioned_video({
                   preset_id: "<matched uuid>",
                   video_url: "https://cdn.example.com/lec42.mp4",
-                  resolution: "1080p",
-                  fps: 30,
                   wait: true
                 })
 3. Response   → { status: "complete", output_url: "https://.../final.mp4", ... }
 ```
+
+Omit **`resolution`** and **`fps`** when the output should follow the **source video** (same rules as the REST API). To override, pass e.g. `resolution: "1080p"` and `fps: 30` — **`fps`** must be **`30`** or **`60`**.
 
 When `wait: true` the call blocks for up to ~4 minutes. For longer videos
 omit `wait` and poll with `get_render_status` instead — or pass a `webhook_url`
