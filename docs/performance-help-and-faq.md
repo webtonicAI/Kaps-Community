@@ -7,7 +7,7 @@ title: Performance Help & FAQ
 
 # Performance Help & FAQ
 
-This document mirrors the in-app **Performance Help & FAQ** popup (Export tab). It is formatted for easy reading on GitHub or GitHub Pages.
+This document will help you get the best performance from your GPU so your Kaps browser based renders are as fast as possible.
 
 ---
 
