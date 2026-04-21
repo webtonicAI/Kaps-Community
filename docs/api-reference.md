@@ -47,7 +47,7 @@ Kick off a render. Must provide **exactly one** of `video_url` or `asset_id`.
 | `preset_id`              | uuid     | yes      | Caption preset ID. Use [`/api-presets-list`](#get-api-presets-list) to discover.                        |
 | `video_url`              | string   | one-of   | Public HTTPS URL to the source video.                                                                  |
 | `asset_id`               | uuid     | one-of   | ID of an asset already uploaded by the owning user.                                                    |
-| `resolution`             | string   | no       | `720p` \| `1080p` \| `4k` \| `native`. Default `1080p`. Aspect ratio is preserved.                     |
+| `resolution`             | string   | no       | `720p` \| `1080p` \| `4k` \| `native`. Omit to keep the **source video’s** resolution; set a value to scale. **`native`** explicitly preserves the original dimensions. Aspect ratio is preserved when scaling. |
 | `fps`                    | int      | no       | 24, 25, 30, 48, 50, or 60. Default `30`.                                                               |
 | `transcription`          | object   | no       | Optional settings for the transcription step (e.g. speaker count, key terms).                            |
 | `transcription.num_speakers` | int  | no       | 1-32. Improves diarization for multi-speaker content.                                                  |
