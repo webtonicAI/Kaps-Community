@@ -3,7 +3,7 @@ layout: default
 title: Kaps Render API Reference
 ---
 
-[← Kaps Community home](index.html)
+{% include nav.html %}
 
 # Kaps Render API Reference
 

@@ -3,7 +3,7 @@ layout: default
 title: Performance Help & FAQ
 ---
 
-[← Kaps Community home](index.html)
+{% include nav.html %}
 
 # Performance Help & FAQ
 

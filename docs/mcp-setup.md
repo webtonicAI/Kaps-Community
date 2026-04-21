@@ -3,7 +3,7 @@ layout: default
 title: Kaps MCP Server Setup
 ---
 
-[← Kaps Community home](index.html)
+{% include nav.html %}
 
 # Kaps MCP Server Setup
 
