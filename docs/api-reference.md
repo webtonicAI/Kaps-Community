@@ -8,9 +8,8 @@ title: Kaps Render API Reference
 # Kaps Render API Reference
 
 The Kaps Render API lets you apply any caption preset to a video programmatically.
-It's the same pipeline the web app uses — ElevenLabs transcription, Remotion
-captions, Modal distributed rendering — exposed behind an API-key-authenticated
-REST endpoint.
+It's the same pipeline the web app uses — **transcription**, **Kaps captions**, and
+**rendering** — exposed behind an API-key-authenticated REST endpoint.
 
 - **Base URL:** `https://<project-ref>.supabase.co/functions/v1`
 - **Auth:** `Authorization: Bearer ksk_live_...` (or `X-API-Key: ksk_live_...`)
@@ -50,7 +49,7 @@ Kick off a render. Must provide **exactly one** of `video_url` or `asset_id`.
 | `asset_id`               | uuid     | one-of   | ID of an asset already uploaded by the owning user.                                                    |
 | `resolution`             | string   | no       | `720p` \| `1080p` \| `4k` \| `native`. Default `1080p`. Aspect ratio is preserved.                     |
 | `fps`                    | int      | no       | 24, 25, 30, 48, 50, or 60. Default `30`.                                                               |
-| `transcription`          | object   | no       | Passed through to ElevenLabs.                                                                          |
+| `transcription`          | object   | no       | Optional settings for the transcription step (e.g. speaker count, key terms).                            |
 | `transcription.num_speakers` | int  | no       | 1-32. Improves diarization for multi-speaker content.                                                  |
 | `transcription.keyterms` | string[] | no       | Domain-specific terms to bias the transcription.                                                       |
 | `webhook_url`            | string   | no       | HTTPS endpoint that receives an [HMAC-signed completion webhook](#webhooks).                           |
@@ -254,7 +253,7 @@ Billing rounds up to the nearest minute, with a 1-minute minimum.
 Currently no per-key rate limit, but you're limited by:
 
 - Your available credit balance (checked pre-flight).
-- The global Modal concurrency for your account.
+- Your account’s concurrent render capacity.
 
 Heavy usage? Get in touch before kicking off >50 concurrent renders.
 

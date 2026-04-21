@@ -32,7 +32,7 @@ Each tool mirrors the same-named REST operation 1:1 — see the
 1. A Kaps account with enough credits to cover your renders.
 2. An API key from **Settings → API keys** (copy the plaintext `ksk_live_…`
    key — it is shown only once).
-3. Your project's Supabase edge-function base URL, e.g.
+3. Your **Kaps API base URL** for Edge Functions (from the app / dashboard), e.g.
    `https://<project-ref>.supabase.co/functions/v1`.
 
 Node 18+ is required to run the server.
