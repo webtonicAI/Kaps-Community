@@ -7,7 +7,7 @@ title: Kaps MCP Server
 
 # Kaps MCP Server
 
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io) lets assistants and IDE agents call tools over a standard protocol. The **`@kaps_ai/mcp-server`** package implements an MCP server over **stdio** that wraps the public Kaps [Render API](./render-api.html): create renders, poll status, and list caption presets.
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io) lets assistants and IDE agents call tools over a standard protocol. The **`@kaps_ai/mcp-server`** package implements an MCP server over **stdio** that wraps the public Kaps [Render API](./render-api.html): check credits, estimate cost, create renders, poll status, and list caption presets.
 
 The **canonical npm package** is published only from the **[Kaps-Community](https://github.com/webtonicAI/Kaps-Community)** repo (`mcp-server/`). Use **`npx`** or **`npm install`** against that published name; optional copies of `mcp-server/` elsewhere are for **local dev only**. Publishing steps and org scope notes: **[MCP server setup](./mcp-setup.html)** (canonical package).
 
@@ -23,11 +23,21 @@ Node.js **18+** is required to run the server.
 
 | Tool | Description |
 | ---- | ----------- |
+| `get_credits` | Returns credit balance for the API key owner (`GET /api-credits`). No arguments. |
+| `estimate_render` | Preflight credit cost without creating a render (`POST /api-render-estimate`). Same body fields as the HTTP endpoint. |
 | `render_captioned_video` | Start a captioned render. Pass either `video_url` (public HTTPS) or `asset_id` (uploaded asset). Returns `request_id` unless `wait: true` (blocks up to ~4 minutes). |
 | `get_render_status` | Poll `queued` / `transcribing` / `rendering` / `complete` / `failed` for a request. |
 | `list_presets` | List presets your key may use (your presets plus applicable public presets). |
 
 Request and response fields match the HTTP API; see **[Render API](./render-api.html)** for full semantics, webhooks, and errors.
+
+### Recommended automation flow
+
+```
+get_credits → estimate_render → render_captioned_video → get_render_status
+```
+
+Use a [completion webhook](./render-api.html#webhooks) instead of polling when renders may run longer than a few minutes.
 
 ## Environment variables
 

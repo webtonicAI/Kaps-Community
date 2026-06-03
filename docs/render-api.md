@@ -13,7 +13,7 @@ The Kaps Render API applies caption presets to video programmatically: **transcr
 - **Auth:** `Authorization: Bearer ksk_live_...` (or `X-API-Key: ksk_live_...`)
 - **Content type:** `application/json`
 
-For a terse MCP wrapper over the same operations, see the [Kaps MCP server](./mcp.html).
+For a terse MCP wrapper over the same operations, see the [Kaps MCP server](./mcp.html). For [n8n](./n8n.html) automation, use the HTTP Request node against the same endpoints.
 
 ---
 
@@ -27,11 +27,105 @@ Authorization: Bearer ksk_live_a1b2c3d4e5f6...
 
 Scopes: tokens currently have `render:write`.
 
+> **Note:** The web app uses `POST /check-credits` with a session JWT. **API integrators** should use [`GET /api-credits`](#get-api-credits) with an API key instead.
+
+---
+
+## `GET` `/api-credits`
+
+Returns the credit balance for the API key owner.
+
+### Response `200 OK`
+
+```json
+{
+  "credits_available": 330,
+  "current_credits": 100,
+  "purchased_credits": 230,
+  "rollover_credits": 0,
+  "plan": "pro",
+  "subscription_active": true
+}
+```
+
+`credits_available` is monthly plus purchased credits — the same pool checked by [`/api-render-create`](#post-api-render-create).
+
+### Example
+
+```bash
+curl -s -H "X-API-Key: ksk_live_..." \
+  https://api.kaps.ai/functions/v1/api-credits
+```
+
+---
+
+## `POST` `/api-render-estimate`
+
+Preflight credit cost **without** creating a render or charging credits. Uses the [same pricing table](#pricing) as completed renders (billed per minute at output resolution/fps tier; charged only on successful completion).
+
+### Duration source
+
+Provide one primary input for clip length:
+
+| Input | Behavior |
+| ----- | -------- |
+| `asset_id` | Uses real duration and dimensions from the user's library asset. |
+| `video_url` | Uses a **60 second @ 1080p** placeholder unless `duration_seconds` is also sent. |
+| `duration_seconds` | Dry-run when you know clip length but have no asset yet. |
+
+Optional: `resolution` (`720p` \| `1080p` \| `4k` \| `native`), `fps` (24–60), `preset_id` (validated if present; does not affect cost).
+
+### Request body
+
+| Field | Type | Required | Notes |
+| ----- | ---- | -------- | ----- |
+| `asset_id` | uuid | one-of | Library asset ID. |
+| `video_url` | string | one-of | Public HTTPS URL (placeholder duration unless `duration_seconds` set). |
+| `duration_seconds` | number | one-of | Known clip length in seconds. |
+| `resolution` | string | no | Output resolution tier for pricing. |
+| `fps` | int | no | 24–60. |
+| `preset_id` | uuid | no | Validated if present; does not change estimated cost. |
+
+### Response `200 OK`
+
+```json
+{
+  "estimated_credits": 8,
+  "credits_available": 330,
+  "can_proceed": true,
+  "assumptions": {
+    "duration_seconds": 185,
+    "fps": 30,
+    "resolution": { "width": 1920, "height": 1080 },
+    "duration_source": "duration_seconds"
+  }
+}
+```
+
+When balance or upload limits would block a real render, `can_proceed` is `false` with optional `credit_warning` (e.g. `insufficient_credits`) and/or `media_warnings` (e.g. `upload_too_large`, `storage_quota_exceeded`). The response is still **HTTP 200** — not an error.
+
+`assumptions.duration_source` is one of: `asset`, `duration_seconds`, `url_placeholder`.
+
+### Example
+
+```bash
+curl -s -X POST "https://api.kaps.ai/functions/v1/api-render-estimate" \
+  -H "Authorization: Bearer ksk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "duration_seconds": 185,
+    "resolution": "1080p",
+    "fps": 30
+  }'
+```
+
 ---
 
 ## `POST` `/api-render-create`
 
 Start a render. Provide **exactly one** of `video_url` or `asset_id`.
+
+> Preflight cost and balance checks: see [`POST /api-render-estimate`](#post-api-render-estimate) before creating a render.
 
 ### Request body
 

@@ -58,6 +58,38 @@ export interface PresetSummary {
   updated_at: string;
 }
 
+export interface CreditsResponse {
+  credits_available: number;
+  current_credits: number;
+  purchased_credits: number;
+  rollover_credits: number;
+  plan: string;
+  subscription_active: boolean;
+}
+
+export interface EstimateRenderInput {
+  asset_id?: string;
+  video_url?: string;
+  duration_seconds?: number;
+  resolution?: "720p" | "1080p" | "4k" | "native";
+  fps?: 24 | 25 | 30 | 48 | 50 | 60;
+  preset_id?: string;
+}
+
+export interface EstimateRenderResponse {
+  estimated_credits: number;
+  credits_available: number;
+  can_proceed: boolean;
+  assumptions: {
+    duration_seconds: number;
+    fps: number;
+    resolution: { width: number; height: number };
+    duration_source: "asset" | "duration_seconds" | "url_placeholder";
+  };
+  credit_warning?: string;
+  media_warnings?: string[];
+}
+
 export class KapsApiError extends Error {
   status: number;
   code?: string;
@@ -89,6 +121,14 @@ export class KapsClient {
   async listPresets(): Promise<PresetSummary[]> {
     const res = await this.request<{ presets: PresetSummary[] }>("GET", "/api-presets-list");
     return res.presets;
+  }
+
+  async getCredits(): Promise<CreditsResponse> {
+    return this.request<CreditsResponse>("GET", "/api-credits");
+  }
+
+  async estimateRender(input: EstimateRenderInput): Promise<EstimateRenderResponse> {
+    return this.request<EstimateRenderResponse>("POST", "/api-render-estimate", input);
   }
 
   private async request<T>(

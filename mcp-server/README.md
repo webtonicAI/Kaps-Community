@@ -6,12 +6,14 @@ The CLI binary (after install) is still **`kaps-mcp`**.
 
 `publishConfig.access` is **`public`** so the scoped package is installable by everyone.
 
-Model Context Protocol (MCP) server for the Kaps public captioned video render API. It exposes create, status, and list-presets operations as MCP tools over **stdio** so clients such as Claude Desktop, Cursor, and MCP Inspector can drive renders from agent workflows.
+Model Context Protocol (MCP) server for the Kaps public captioned video render API. It exposes credits, estimate, create, status, and list-presets operations as MCP tools over **stdio** so clients such as Claude Desktop, Cursor, and MCP Inspector can drive renders from agent workflows.
 
 ## Tools
 
 | Tool | Description |
 | ---- | ----------- |
+| `get_credits` | Credit balance for the API key owner. |
+| `estimate_render` | Preflight credit cost without creating a render. |
 | `render_captioned_video` | Start a render with a caption preset; pass either a public `video_url` or `asset_id`. Use `wait: true` to block until completion (up to ~4 minutes). |
 | `get_render_status` | Poll status for a `request_id` returned from create. |
 | `list_presets` | List caption presets available to your API key. |

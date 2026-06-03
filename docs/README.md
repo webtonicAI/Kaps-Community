@@ -8,6 +8,7 @@ Index of user-facing docs in this repository (paths are relative to the `docs/` 
 | MCP server (setup, tools, env, clients) | [mcp.md](./mcp.md) |
 | MCP canonical npm package & publishing | [mcp-setup.md](./mcp-setup.md) |
 | Render API (REST, auth, webhooks, errors) | [render-api.md](./render-api.md) |
+| n8n automation | [n8n.md](./n8n.md) |
 | Performance help & FAQ | [performance-help-and-faq.md](./performance-help-and-faq.md) |
 | Legal | [legal/](./legal/) |
 

@@ -10,6 +10,8 @@
  *                    https://api.kaps.ai/functions/v1
  *
  * Tools:
+ *   - get_credits             credit balance for the API key owner.
+ *   - estimate_render         preflight credit cost without creating a render.
  *   - render_captioned_video  kick off a render job (async by default,
  *                             set `wait: true` to block up to ~5 min).
  *   - get_render_status       poll the current state of a request.
@@ -92,7 +94,68 @@ const statusInputSchema = z.object({
 
 const listPresetsInputSchema = z.object({});
 
+const getCreditsInputSchema = z.object({});
+
+const estimateInputSchema = z.object({
+  asset_id: z.string().uuid().optional().describe(
+    "Library asset ID — uses real duration/dimensions from the asset.",
+  ),
+  video_url: z.string().url().optional().describe(
+    "Public video URL — uses a 60s @ 1080p placeholder unless duration_seconds is also sent.",
+  ),
+  duration_seconds: z.number().positive().optional().describe(
+    "Known clip length in seconds for a dry-run estimate.",
+  ),
+  resolution: z
+    .enum(["720p", "1080p", "4k", "native"])
+    .optional()
+    .describe("Output resolution tier for pricing."),
+  fps: z
+    .union([
+      z.literal(24),
+      z.literal(25),
+      z.literal(30),
+      z.literal(48),
+      z.literal(50),
+      z.literal(60),
+    ])
+    .optional()
+    .describe("Output frame rate for pricing."),
+  preset_id: z.string().uuid().optional().describe(
+    "Validated if present; does not affect estimated cost.",
+  ),
+});
+
 const tools = [
+  {
+    name: "get_credits",
+    description:
+      "Returns the credit balance for the API key owner (monthly + purchased pool).",
+    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+  },
+  {
+    name: "estimate_render",
+    description:
+      "Preflight credit cost without creating a render or charging credits. Provide asset_id, video_url, and/or duration_seconds as the duration source. Check can_proceed before calling render_captioned_video.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        asset_id: { type: "string", format: "uuid" },
+        video_url: { type: "string", format: "uri" },
+        duration_seconds: { type: "number", exclusiveMinimum: 0 },
+        resolution: {
+          type: "string",
+          enum: ["720p", "1080p", "4k", "native"],
+        },
+        fps: {
+          type: "number",
+          enum: [24, 25, 30, 48, 50, 60],
+        },
+        preset_id: { type: "string", format: "uuid" },
+      },
+    },
+  },
   {
     name: "render_captioned_video",
     description:
@@ -163,6 +226,16 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
   const { name, arguments: args } = req.params;
   try {
     switch (name) {
+      case "get_credits": {
+        getCreditsInputSchema.parse(args ?? {});
+        const res = await client.getCredits();
+        return ok(res);
+      }
+      case "estimate_render": {
+        const parsed = estimateInputSchema.parse(args ?? {});
+        const res = await client.estimateRender(parsed);
+        return ok(res);
+      }
       case "render_captioned_video": {
         const parsed = renderInputSchema.parse(args ?? {});
         const res = await client.createRender(parsed);

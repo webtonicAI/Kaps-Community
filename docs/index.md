@@ -11,6 +11,7 @@ layout: default
 - [Performance help & FAQ](performance-help-and-faq.html) — GPU setup, export settings, and troubleshooting  
 - [Render API](render-api.html) — REST endpoints, webhooks, examples  
 - [MCP server](mcp.html) — use the API from Claude, Cursor, and other MCP clients  
+- [n8n](n8n.html) — automate renders with HTTP Request and Webhook nodes  
 - [MCP npm package (canonical publish)](mcp-setup.html) — where `@kaps_ai/mcp-server` is released from  
 - [Legal](legal/) — privacy policy and terms of service  
 - [Issues on GitHub](https://github.com/webtonicAI/Kaps-Community/issues) — bugs, ideas, and discussion  
