@@ -15,8 +15,6 @@ The Kaps Render API applies caption presets to video programmatically: **transcr
 
 For a terse MCP wrapper over the same operations, see the [Kaps MCP server](./mcp.html).
 
-A fuller product reference may also be published on **[https://kaps.app](https://kaps.app)** in the future; this document describes the public HTTP surface at **`api.kaps.ai`**.
-
 ---
 
 ## Authentication
