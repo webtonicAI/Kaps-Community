@@ -10,7 +10,9 @@ export interface KapsClientOptions {
 }
 
 export interface CreateRenderInput {
-  preset_id: string;
+  recipe_id?: string;
+  /** @deprecated Use `recipe_id`. */
+  preset_id?: string;
   video_url?: string;
   asset_id?: string;
   resolution?: "720p" | "1080p" | "4k" | "native";
@@ -43,6 +45,7 @@ export interface RenderStatusResponse {
   created_at: string;
   updated_at: string;
   input: {
+    recipe_id?: string;
     preset_id?: string;
     resolution?: string;
     fps?: number;
@@ -73,6 +76,7 @@ export interface EstimateRenderInput {
   duration_seconds?: number;
   resolution?: "720p" | "1080p" | "4k" | "native";
   fps?: 24 | 25 | 30 | 48 | 50 | 60;
+  recipe_id?: string;
   preset_id?: string;
 }
 
@@ -110,7 +114,13 @@ export class KapsClient {
   }
 
   async createRender(input: CreateRenderInput): Promise<CreateRenderResponse> {
-    return this.request<CreateRenderResponse>("POST", "/api-render-create", input);
+    const recipeId = input.recipe_id || input.preset_id;
+    if (!recipeId) throw new Error("recipe_id is required");
+    return this.request<CreateRenderResponse>("POST", "/api-render-create", {
+      ...input,
+      recipe_id: recipeId,
+      preset_id: recipeId,
+    });
   }
 
   async getRenderStatus(requestId: string): Promise<RenderStatusResponse> {
@@ -118,9 +128,20 @@ export class KapsClient {
     return this.request<RenderStatusResponse>("GET", `/api-render-status?${qs}`);
   }
 
+  async listRecipes(): Promise<PresetSummary[]> {
+    let res: { recipes?: PresetSummary[]; presets?: PresetSummary[] };
+    try {
+      res = await this.request("GET", "/api-recipes-list");
+    } catch (err) {
+      if (!(err instanceof KapsApiError) || err.status !== 404) throw err;
+      res = await this.request("GET", "/api-presets-list");
+    }
+    return res.recipes ?? res.presets ?? [];
+  }
+
+  /** @deprecated Use `listRecipes`. */
   async listPresets(): Promise<PresetSummary[]> {
-    const res = await this.request<{ presets: PresetSummary[] }>("GET", "/api-presets-list");
-    return res.presets;
+    return this.listRecipes();
   }
 
   async getCredits(): Promise<CreditsResponse> {
@@ -128,7 +149,11 @@ export class KapsClient {
   }
 
   async estimateRender(input: EstimateRenderInput): Promise<EstimateRenderResponse> {
-    return this.request<EstimateRenderResponse>("POST", "/api-render-estimate", input);
+    const recipeId = input.recipe_id || input.preset_id;
+    return this.request<EstimateRenderResponse>("POST", "/api-render-estimate", {
+      ...input,
+      ...(recipeId ? { recipe_id: recipeId, preset_id: recipeId } : {}),
+    });
   }
 
   private async request<T>(

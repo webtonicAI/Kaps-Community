@@ -15,7 +15,7 @@
  *   - render_captioned_video  kick off a render job (async by default,
  *                             set `wait: true` to block up to ~5 min).
  *   - get_render_status       poll the current state of a request.
- *   - list_presets            list caption presets accessible to the key.
+ *   - list_recipes            list caption recipes accessible to the key.
  *
  * Transport: stdio. Launch via `npx @kaps_ai/mcp-server` or `kaps-mcp`.
  */
@@ -45,7 +45,8 @@ const client = new KapsClient({ apiKey, baseUrl });
 
 const renderInputSchema = z
   .object({
-    preset_id: z.string().uuid().describe("Caption preset ID (from list_presets)."),
+    recipe_id: z.string().uuid().optional().describe("Caption recipe ID (from list_recipes)."),
+    preset_id: z.string().uuid().optional().describe("Deprecated alias for recipe_id."),
     video_url: z.string().url().optional().describe(
       "Public URL of the source video. Provide either this or asset_id.",
     ),
@@ -84,6 +85,9 @@ const renderInputSchema = z
       .default(false)
       .describe("If true, long-poll until the render finishes (up to ~4 minutes)."),
   })
+  .refine((v) => Boolean(v.recipe_id || v.preset_id), {
+    message: "`recipe_id` is required.",
+  })
   .refine((v) => Boolean(v.video_url) !== Boolean(v.asset_id), {
     message: "Provide exactly one of `video_url` or `asset_id`.",
   });
@@ -92,7 +96,7 @@ const statusInputSchema = z.object({
   request_id: z.string().uuid(),
 });
 
-const listPresetsInputSchema = z.object({});
+const listRecipesInputSchema = z.object({});
 
 const getCreditsInputSchema = z.object({});
 
@@ -121,8 +125,11 @@ const estimateInputSchema = z.object({
     ])
     .optional()
     .describe("Output frame rate for pricing."),
-  preset_id: z.string().uuid().optional().describe(
+  recipe_id: z.string().uuid().optional().describe(
     "Validated if present; does not affect estimated cost.",
+  ),
+  preset_id: z.string().uuid().optional().describe(
+    "Deprecated alias for recipe_id.",
   ),
 });
 
@@ -152,23 +159,28 @@ const tools = [
           type: "number",
           enum: [24, 25, 30, 48, 50, 60],
         },
-        preset_id: { type: "string", format: "uuid" },
+        recipe_id: { type: "string", format: "uuid" },
+        preset_id: { type: "string", format: "uuid", description: "Deprecated alias for recipe_id." },
       },
     },
   },
   {
     name: "render_captioned_video",
     description:
-      "Render a captioned video with a Kaps caption preset. Pass either a public `video_url` or a previously-uploaded `asset_id`. Returns a request_id you can poll with get_render_status, unless `wait=true`. Omit `resolution` / `fps` to keep the source video's dimensions and frame rate.",
+      "Render a captioned video with a Kaps caption recipe. Pass either a public `video_url` or a previously-uploaded `asset_id`. Returns a request_id you can poll with get_render_status, unless `wait=true`. Omit `resolution` / `fps` to keep the source video's dimensions and frame rate.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
-      required: ["preset_id"],
       properties: {
+        recipe_id: {
+          type: "string",
+          format: "uuid",
+          description: "Caption recipe ID (call list_recipes to discover).",
+        },
         preset_id: {
           type: "string",
           format: "uuid",
-          description: "Caption preset ID (call list_presets to discover).",
+          description: "Deprecated alias for recipe_id.",
         },
         video_url: { type: "string", format: "uri" },
         asset_id: { type: "string", format: "uuid" },
@@ -209,14 +221,19 @@ const tools = [
     },
   },
   {
+    name: "list_recipes",
+    description: "List caption recipes accessible to the API key (the user's own recipes plus any public ones).",
+    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+  },
+  {
     name: "list_presets",
-    description: "List caption presets accessible to the API key (the user's own presets plus any public ones).",
+    description: "Deprecated alias for list_recipes.",
     inputSchema: { type: "object", additionalProperties: false, properties: {} },
   },
 ] as const;
 
 const server = new Server(
-  { name: "kaps-mcp", version: "0.1.0" },
+  { name: "kaps-mcp", version: "0.2.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -246,10 +263,11 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         const res = await client.getRenderStatus(parsed.request_id);
         return ok(res);
       }
+      case "list_recipes":
       case "list_presets": {
-        listPresetsInputSchema.parse(args ?? {});
-        const presets = await client.listPresets();
-        return ok({ presets });
+        listRecipesInputSchema.parse(args ?? {});
+        const recipes = await client.listRecipes();
+        return ok({ recipes });
       }
       default:
         return err(`Unknown tool: ${name}`);

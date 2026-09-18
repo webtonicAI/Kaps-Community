@@ -7,54 +7,27 @@ title: Kaps MCP Server
 
 # Kaps MCP Server
 
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io) lets assistants and IDE agents call tools over a standard protocol. The **`@kaps_ai/mcp-server`** package implements an MCP server over **stdio** that wraps the public Kaps [Render API](./render-api.html): check credits, estimate cost, create renders, poll status, and list caption presets.
+The **`@kaps_ai/mcp-server`** package wraps the [Render API](./render-api.html) as [MCP](https://modelcontextprotocol.io) tools, so Claude Desktop, Cursor, and other MCP clients can render captioned videos in one tool call.
 
-The **canonical npm package** is published only from the **[Kaps-Community](https://github.com/webtonicAI/Kaps-Community)** repo (`mcp-server/`). Use **`npx`** or **`npm install`** against that published name; optional copies of `mcp-server/` elsewhere are for **local dev only**. Publishing steps and org scope notes: **[MCP server setup](./mcp-setup.html)** (canonical package).
+Full concept overview and usage patterns: **[kaps.ai → Info → MCP Setup](https://kaps.ai/info?doc=mcp)**. This page has the exact install details — the canonical package is published only from this repo’s [`mcp-server/`](https://github.com/webtonicAI/Kaps-Community/tree/main/mcp-server), scope **`@kaps_ai`** (not `@kaps`).
 
 ## Prerequisites
 
-1. A **Kaps** account ([kaps.ai](https://kaps.ai)) with credits for rendering.
-2. An **API key** from **Settings → API keys** (plaintext `ksk_live_…` is shown only once).
-3. **`KAPS_API_URL`** — the Kaps API base URL: `https://api.kaps.ai/functions/v1`.
-
-Node.js **18+** is required to run the server.
+- A Kaps account with render credits, and an API key from Studio → **API** (`ksk_live_…`, shown once)
+- **`KAPS_API_URL`**: `https://api.kaps.ai/functions/v1`
+- Node.js 18+
 
 ## Tools
 
 | Tool | Description |
 | ---- | ----------- |
-| `get_credits` | Returns credit balance for the API key owner (`GET /api-credits`). No arguments. |
-| `estimate_render` | Preflight credit cost without creating a render (`POST /api-render-estimate`). Same body fields as the HTTP endpoint. |
-| `render_captioned_video` | Start a captioned render. Pass either `video_url` (public HTTPS) or `asset_id` (uploaded asset). Returns `request_id` unless `wait: true` (blocks up to ~4 minutes). |
-| `get_render_status` | Poll `queued` / `transcribing` / `rendering` / `complete` / `failed` for a request. |
-| `list_presets` | List presets your key may use (your presets plus applicable public presets). |
+| `get_credits` | Credit balance for the key owner |
+| `estimate_render` | Preflight credit cost |
+| `render_captioned_video` | Start a render (`video_url` or `asset_id`) |
+| `get_render_status` | Poll render status |
+| `list_recipes` | List usable caption recipes |
 
-Request and response fields match the HTTP API; see **[Render API](./render-api.html)** for full semantics, webhooks, and errors.
-
-### Recommended automation flow
-
-```
-get_credits → estimate_render → render_captioned_video → get_render_status
-```
-
-Use a [completion webhook](./render-api.html#webhooks) instead of polling when renders may run longer than a few minutes.
-
-## Environment variables
-
-| Name | Required | Description |
-| ---- | :------: | ----------- |
-| `KAPS_API_KEY` | yes | `ksk_live_…` API key. |
-| `KAPS_API_URL` | yes | Kaps API base URL (no trailing slash required), e.g. `https://api.kaps.ai/functions/v1`. |
-
-The process exits at startup if either is missing.
-
-## Configure MCP clients
-
-### Cursor
-
-Edit **`%USERPROFILE%\.cursor\mcp.json`** on Windows or **`~/.cursor/mcp.json`** on macOS/Linux (recommended so MCP is not tied to one project). A project-local `.cursor/mcp.json` works too.
-
-Use the **`args`** package string that matches [Kaps-Community `mcp-server/package.json`](https://github.com/webtonicAI/Kaps-Community/blob/main/mcp-server/package.json) (currently **`@kaps_ai/mcp-server`** — scope **`kaps_ai`** is your npm username’s scope; that is different from an org named **`@kaps`**). Set **`KAPS_API_URL`** to **`https://api.kaps.ai/functions/v1`**.
+## Configure
 
 ```json
 {
@@ -71,66 +44,19 @@ Use the **`args`** package string that matches [Kaps-Community `mcp-server/packa
 }
 ```
 
-### Claude Desktop
+- **Cursor:** `~/.cursor/mcp.json` (or project-local `.cursor/mcp.json`)
+- **Claude Desktop:** `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`, Windows: `%APPDATA%\Claude\`)
 
-Edit `claude_desktop_config.json`:
+Restart the client after saving.
 
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+## Troubleshooting
 
-```json
-{
-  "mcpServers": {
-    "kaps": {
-      "command": "npx",
-      "args": ["-y", "@kaps_ai/mcp-server"],
-      "env": {
-        "KAPS_API_KEY": "ksk_live_...",
-        "KAPS_API_URL": "https://api.kaps.ai/functions/v1"
-      }
-    }
-  }
-}
-```
-
-Restart the desktop app after saving.
-
-### Local development (no `npx`)
-
-After `npm install` and `npm run build` in the repo’s `mcp-server/` folder, point **`command`** at `node` and **`args`** at the **absolute** path to `dist/index.js`, with the same `env` block:
-
-```json
-{
-  "mcpServers": {
-    "kaps": {
-      "command": "node",
-      "args": ["C:/path/to/kaps-community/mcp-server/dist/index.js"],
-      "env": {
-        "KAPS_API_KEY": "ksk_live_...",
-        "KAPS_API_URL": "https://api.kaps.ai/functions/v1"
-      }
-    }
-  }
-}
-```
-
-Restart Cursor (or reload MCP) after saving.
-
-### Troubleshooting install
-
-| Symptom | What to check |
-| ------- | --------------- |
-| **`npx` / `npm view` 404** | Package not published under that name, or wrong package string in `args`. Publish from **Kaps-Community** `mcp-server/` only; confirm name in [`package.json`](https://github.com/webtonicAI/Kaps-Community/blob/main/mcp-server/package.json). |
-| **`Node` / `npx` not found** in Cursor (Windows) | Use full paths: `"command": "C:\\Program Files\\nodejs\\node.exe"` (or your install location) and `"args": ["…\\npx.cmd", "-y", "@kaps_ai/mcp-server"]`. Usually leaving `"command": "npx"` is enough if Node is on `PATH`. |
-| **`npm publish` 404** on `PUT /@kaps/...` | You tried to publish under the **`@kaps`** **organization** scope. This repo uses **`@kaps_ai/mcp-server`** (user scope **`kaps_ai`**, same as npm user **`kaps_ai`**). |
-| **`npm publish` 403** | npm **2FA** / invalid token: **`npm publish --otp=<code>`**; or wrong npm login — use account **`kaps_ai`** for official publishes. |
-
-## Security
-
-- Do not commit API keys; use your client’s `env` configuration only.
-- Revoked keys fail immediately on the server.
+| Symptom | Fix |
+| ------- | --- |
+| `npx` 404 | Wrong package string — confirm `@kaps_ai/mcp-server` in [`package.json`](https://github.com/webtonicAI/Kaps-Community/blob/main/mcp-server/package.json) |
+| `npm publish` 404 on `@kaps/...` | Wrong scope — this repo publishes under `@kaps_ai`, not the `@kaps` org |
 
 ## Further reading
 
-- **[Render API](./render-api.html)** — REST endpoints, auth, webhooks, errors, examples.
-- Package source and publishing notes: [`mcp-server/README.md`](https://github.com/webtonicAI/Kaps-Community/tree/main/mcp-server) in this repository.
+- **[Render API](./render-api.html)** — full endpoint reference (hosted on kaps.ai)
+- Local dev / source: [`mcp-server/README.md`](https://github.com/webtonicAI/Kaps-Community/tree/main/mcp-server)
