@@ -1,12 +1,8 @@
 # `@kaps_ai/mcp-server`
 
-**npm package:** **`@kaps_ai/mcp-server`** — published under the **[user scope](https://docs.npmjs.com/about-scopes#scope-as-a-user-name) `kaps_ai`**, which matches the npm account **`kaps_ai`**. You do not need the separate **`@kaps`** org (a different scope); the earlier **404** on `PUT /@kaps/...` was from trying to publish to an org you do not control.
+MCP server for the [Kaps](https://kaps.ai) render API. Published as **`@kaps_ai/mcp-server`**. The CLI binary is **`kaps-mcp`**.
 
-The CLI binary (after install) is still **`kaps-mcp`**.
-
-`publishConfig.access` is **`public`** so the scoped package is installable by everyone.
-
-Model Context Protocol (MCP) server for the Kaps public captioned video render API. It exposes credits, estimate, create, status, and list-recipes operations as MCP tools over **stdio** so clients such as Claude Desktop, Cursor, and MCP Inspector can drive renders from agent workflows.
+Docs and API keys: **[kaps.ai → Info → MCP Setup](https://kaps.ai/info?doc=mcp)**
 
 ## Tools
 
@@ -18,7 +14,7 @@ Model Context Protocol (MCP) server for the Kaps public captioned video render A
 | `get_render_status` | Poll status for a `request_id` returned from create. |
 | `list_recipes` | List caption recipes available to your API key. |
 
-Full HTTP field semantics match the [Render API](../docs/render-api.md). User-facing setup (what MCP is, prerequisites, examples) is in [docs/mcp.md](../docs/mcp.md).
+HTTP fields: **[kaps.ai → Info → API Reference](https://kaps.ai/info?doc=api)**.
 
 ## Requirements
 
@@ -29,7 +25,7 @@ Full HTTP field semantics match the [Render API](../docs/render-api.md). User-fa
 
 | Variable | Required | Description |
 | -------- | :------: | ----------- |
-| `KAPS_API_KEY` | yes | API key from **Settings → API keys** in Kaps. |
+| `KAPS_API_KEY` | yes | API key from Studio → **API** in Kaps. |
 | `KAPS_API_URL` | yes | Kaps API base URL, e.g. `https://api.kaps.ai/functions/v1`. |
 
 ## Install and build (from this repo)
@@ -113,4 +109,4 @@ If `npx` is not suitable, point the client at the built entrypoint:
 
 ## License
 
-This package is released under the [MIT License](./LICENSE) in this directory. The community repository does not yet define a single root `LICENSE` file; licensing for other folders may differ.
+This package is released under the [MIT License](./LICENSE) in this directory.
