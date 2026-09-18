@@ -16,8 +16,8 @@
         "assignments": {
           "assignments": [
             {
-              "id": "preset_id",
-              "name": "preset_id",
+              "id": "recipe_id",
+              "name": "recipe_id",
               "value": "00000000-0000-0000-0000-000000000000",
               "type": "string"
             },
@@ -48,7 +48,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [220, 0],
-      "notes": "Replace preset_id and video_url before running. Call GET /api-presets-list to find preset IDs."
+      "notes": "Replace recipe_id and video_url before running. Call GET /api-recipes-list to find recipe IDs."
     },
     {
       "parameters": {
@@ -58,7 +58,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"preset_id\": \"{{ $json.preset_id }}\",\n  \"video_url\": \"{{ $json.video_url }}\",\n  \"resolution\": \"{{ $json.resolution }}\",\n  \"fps\": {{ $json.fps }},\n  \"wait\": true\n}",
+        "jsonBody": "={\n  \"recipe_id\": \"{{ $json.recipe_id }}\",\n  \"video_url\": \"{{ $json.video_url }}\",\n  \"resolution\": \"{{ $json.resolution }}\",\n  \"fps\": {{ $json.fps }},\n  \"wait\": true\n}",
         "options": {}
       },
       "id": "a1b2c3d4-0003-4000-8000-000000000003",
