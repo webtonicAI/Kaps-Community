@@ -1,12 +1,12 @@
-# Contributing to Kaps Community
+# Contributing
 
-This repository is **not currently accepting outside contributions**. Issues are welcome if you’ve hit a bug, but pull requests won’t be reviewed or merged at this time.
+This repository publishes **`@kaps_ai/mcp-server`**. It is not accepting outside pull requests. Issues are welcome.
 
-It contains the **`@kaps_ai/mcp-server`** Node/TypeScript package in [`mcp-server/`](./mcp-server/) and the [Kaps Community](https://webtonicai.github.io/Kaps-Community/) docs site under [`docs/`](./docs/).
+Product docs are in the Kaps app: [kaps.ai](https://kaps.ai/info?doc=mcp).
 
-## Publishing `@kaps_ai/mcp-server` (maintainers only)
+## Publishing (maintainers)
 
-Only from **this** repo’s `mcp-server/`, using the **`kaps_ai`** npm account (run `npm whoami` and expect `kaps_ai`). Do not publish from forked or application repos.
+From `mcp-server/`, as the `kaps_ai` npm account (`npm whoami`):
 
 ```bash
 cd mcp-server

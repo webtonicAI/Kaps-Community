@@ -1,8 +1,22 @@
-# Kaps Community
+# `@kaps_ai/mcp-server`
 
-**[Kaps](https://kaps.ai)** — a futuristic AI caption maker with smart text categorisation and a sophisticated UI for custom captions. This repository hosts community documentation, GitHub Pages content, and the open-source **`@kaps_ai/mcp-server`** npm package under [`mcp-server/`](./mcp-server/) so developers can drive the public render API from MCP-aware clients (Cursor, Claude Desktop, and others).
+Open-source MCP server for the [Kaps](https://kaps.ai) render API. This repository publishes the npm package. Product docs, API keys, and recipes live in the app:
 
-- **App docs (sign in):** [kaps.ai](https://kaps.ai) — API, MCP, n8n, and performance guides
-- **Community site:** [webtonicai.github.io/Kaps-Community](https://webtonicai.github.io/Kaps-Community/)
-- **MCP package:** [`@kaps_ai/mcp-server`](./mcp-server/)
-- **Issues:** [github.com/webtonicAI/Kaps-Community/issues](https://github.com/webtonicAI/Kaps-Community/issues)
+**[kaps.ai → Info → MCP Setup](https://kaps.ai/info?doc=mcp)**
+
+```json
+{
+  "mcpServers": {
+    "kaps": {
+      "command": "npx",
+      "args": ["-y", "@kaps_ai/mcp-server"],
+      "env": {
+        "KAPS_API_KEY": "ksk_live_...",
+        "KAPS_API_URL": "https://api.kaps.ai/functions/v1"
+      }
+    }
+  }
+}
+```
+
+Package source is in [`mcp-server/`](./mcp-server/). Report bugs in [Issues](https://github.com/webtonicAI/Kaps-Community/issues).
